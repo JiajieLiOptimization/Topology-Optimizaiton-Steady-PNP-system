@@ -1,0 +1,29 @@
+ L2 norm of potential phi:4.26289e-07
+ L2 norm of concentration c:6.76674e-10
+ L2 norm of potential phi:8.47653e-10
+concentration: 0.399433
+total energy: 0.315087
+eps0: 0.01
+ L2 norm of concentration c:0.50838
+ L2 norm of potential phi:0.00926017
+ L2 norm of concentration c:0.000202115
+ L2 norm of potential phi:0.000254358
+ L2 norm of concentration c:6.49845e-07
+ L2 norm of potential phi:8.16377e-07
+ L2 norm of concentration c:1.57121e-09
+ L2 norm of potential phi:1.97867e-09
+concentration: 0.402142
+total energy: 0.307533
+eps0: 0.01
+ L2 norm of concentration c:0.507309
+ L2 norm of potential phi:0.0095551
+ L2 norm of concentration c:0.000165012
+ L2 norm of potential phi:0.00021023
+ L2 norm of concentration c:4.64356e-07
+ L2 norm of potential phi:5.82365e-07
+ L2 norm of concentration c:1.08793e-09
+ L2 norm of potential phi:1.36779e-09
+concentration: 0.400418
+total energy: 0.305556
+eps0: 0.01
+ try getConsole C:\Users\user\Desktop\TopOpt_PNP\example2disk_bigInnRadius\eps=0.01\m=10\PNP_Opt_Slot_2d.edp
