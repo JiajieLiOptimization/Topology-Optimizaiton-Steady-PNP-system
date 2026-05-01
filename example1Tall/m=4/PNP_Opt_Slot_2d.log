@@ -1,0 +1,28 @@
+  232 : ffuv<<"Zone"<<"   "<<"N="<<Th.nv<<","<<"E="<<Th.nt<<","<<"F=FEPOINT,ET=TRIANGLE"<<endl;
+  233 :
+  234 :
+  235 : // out put for domain 1 velocity, pressure temparature
+  236 :          int i,j;
+  237 : //
+  238 :         for( i=0;i<Th.nv;i++)
+  239 :         {
+  240 :         //ffnt<<Th(i).x<<"   "<<Th(i).y<<"   "<<T(Th(i).x,Th(i).y)<<endl;
+  241 :                 ffuv<<Th(i).x<<"   "<<Th(i).y<<"   "<<u1(Th(i).x,Th(i).y)<<"   "<<u2(Th(i).x,Th(i).y)<<"     "<<sqrt(u1^2+u2^2)(Th(i).x,Th(i).y)<<endl;
+  242 :         }
+  243 : //
+  244 :         for(i=0;i<Th.nt;i++)
+  245 :         {
+  246 :         for( j=0;j<3;j++)
+  247 :         {
+  248 :         //ffnt<<Th[i][j]+1<<"  ";
+  249 :         ffuv<<Th[i][j]+1<<"  ";
+  250 :                 }
+  251 :         if(j==3)
+  252 :         {
+  253 :         //ffnt<<endl;
+  254 :         ffuv<<endl;
+  255 :                 }
+  256 :  } sizestack + 1024 =31884  ( 30860 )
+ 
+  --  mesh:  Nb of Triangles =  45536, Nb of Vertices 23069
+ try getConsole C:\Users\user\Desktop\TopOpt_PNP\example1Tall\m=4\PNP_Opt_Slot_2d.edp

@@ -1,0 +1,28 @@
+  236 :          int i,j;
+  237 : //
+  238 :         for( i=0;i<Th.nv;i++)
+  239 :         {
+  240 :         //ffnt<<Th(i).x<<"   "<<Th(i).y<<"   "<<T(Th(i).x,Th(i).y)<<endl;
+  241 :                 ffuv<<Th(i).x<<"   "<<Th(i).y<<"   "<<u1(Th(i).x,Th(i).y)<<"   "<<u2(Th(i).x,Th(i).y)<<"     "<<sqrt(u1^2+u2^2)(Th(i).x,Th(i).y)<<endl;
+  242 :         }
+  243 : //
+  244 :         for(i=0;i<Th.nt;i++)
+  245 :         {
+  246 :         for( j=0;j<3;j++)
+  247 :         {
+  248 :         //ffnt<<Th[i][j]+1<<"  ";
+  249 :         ffuv<<Th[i][j]+1<<"  ";
+  250 :                 }
+  251 :         if(j==3)
+  252 :         {
+  253 :         //ffnt<<endl;
+  254 :         ffuv<<endl;
+  255 :                 }
+  256 :  } sizestack + 1024 =32364  ( 31340 )
+ 
+  --  mesh:  Nb of Triangles =  45536, Nb of Vertices 23069
+ L2 norm of concentration c:0.578652
+ L2 norm of potential phi:0.408223
+ L2 norm of concentration c:0.000348644
+ L2 norm of potential phi:0.000961688
+ try getConsole C:\Users\user\Desktop\TopOpt_PNP\example1Tall\m=10\PNP_Opt_Slot_2d.edp
