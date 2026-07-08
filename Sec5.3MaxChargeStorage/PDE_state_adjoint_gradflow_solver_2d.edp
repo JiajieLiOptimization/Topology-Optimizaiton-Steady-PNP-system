@@ -1,0 +1,96 @@
+// =============================================================
+// 2D PNP State, Adjoint and Gradient Flow Solver Module
+// For supercapacitor electrode topology optimization
+// Includes: Nernst-Planck equations, Poisson equation,
+//           Newton correction, Slotboom formulation,
+//           adjoint system, and Allen-Cahn phase field evolution
+// Corresponds to the numerical schemes in Section 3 of the manuscript
+// =============================================================
+// Dependencies (must be defined before including):
+//   --- Mesh and spaces ---
+//   - Th: computational mesh
+//   - Wh: P1 finite element space
+//   - Qh: P0 finite element space
+//   - grad: gradient macro
+//   --- State equation variables ---
+//   - c1, c2: ion concentrations (Wh)
+//   - psi: electric potential (Wh)
+//   - v: scalar test function (Wh)
+//   - dpsi: Newton correction for potential (Wh)
+//   - rho1, rho2: Slotboom transformed densities (Wh)
+//   - E1, E2: exponential potential terms (Wh)
+//   - Ea1, Ea2: inverse exponential terms (Qh)
+//   --- Adjoint equation variables ---
+//   - s1, s2, zeta: adjoint state variables (Wh)
+//   - v1, v2, v3: adjoint test functions (Wh)
+//   --- Phase field variables ---
+//   - phi, phiold: level set functions (Wh)
+//   - r: descent direction term (Wh)
+//   --- Coefficients and parameters ---
+//   - D: diffusion coefficient field (Wh)
+//   - eps: permittivity coefficient field (Wh)
+//   - z1, z2: ion valence numbers
+//   - c0: inlet concentration boundary value
+//   - psi0: electrode potential boundary value
+//   - dt, kappa, Sta1, Sta2, beta, VolTarg, lag: phase field parameters
+//   - vol: current volume fraction
+//   --- Boundary labels ---
+//   - Gammain: inlet boundary label
+//   - Gamma2: electrode boundary label
+// =============================================================
+
+// -------------------- Nernst-Planck equations --------------------
+problem NernstPlanck1(c1, v)
+    = int2d(Th)(D*[dx(c1) + z1*c1*dx(psi), dy(c1) + z1*c1*dy(psi)]'*grad(v))
+    + on(Gammain, c1=0.5) + on(Gamma2, c1=0);
+
+problem NernstPlanck2(c2, v)
+    = int2d(Th)(D*[dx(c2) + z2*c2*dx(psi), dy(c2) + z2*c2*dy(psi)]'*grad(v))
+    + on(Gammain, c2=0.5) + on(Gamma2, c2=0);
+
+// -------------------- Poisson equation --------------------
+problem Poisson(psi, v)
+    = int2d(Th)(eps*grad(psi)'*grad(v))
+    - int2d(Th)(phi*z1*c1*v + phi*z2*c2*v)
+    + on(Gamma2, psi=psi0) + on(Gammain, psi=0.0);
+
+// -------------------- Newton correction for Poisson --------------------
+problem NewtonCorPoisson(dpsi, v, init=0)
+    = int2d(Th)(eps*grad(dpsi)'*grad(v)
+        + phi*z1^2*rho1*exp(-z1*psi)*dpsi*v
+        + phi*z2^2*rho2*exp(-z2*psi)*dpsi*v)
+    + int2d(Th)(eps*grad(psi)'*grad(v)
+        - phi*z1*rho1*exp(-z1*psi)*v
+        - phi*z2*rho2*exp(-z2*psi)*v)
+    + on(Gammain, Gamma2, dpsi=0);
+
+// -------------------- Slotboom formulation of Nernst-Planck --------------------
+problem NernstPlanck1Slot(rho1, v, init=0)
+    = int2d(Th)(D*[Ea1*dx(rho1), Ea1*dy(rho1)]'*grad(v))
+    + on(Gammain, rho1 = c0*exp(z1*psi)) + on(Gamma2, rho1=0);
+
+problem NernstPlanck2Slot(rho2, v, init=0)
+    = int2d(Th)(D*[Ea2*dx(rho2), Ea2*dy(rho2)]'*grad(v))
+    + on(Gammain, rho2 = c0*exp(z2*psi)) + on(Gamma2, rho2=0);
+
+// -------------------- Adjoint system --------------------
+problem Adjoint([s1,s2,zeta],[v1,v2,v3])
+    = int2d(Th)(D*grad(s1)'*grad(v1) + D*grad(s1)'*[z1*v1*dx(psi), z1*v1*dy(psi)])
+    + int2d(Th)(z1*psi*v1) - int2d(Th)(z1*phi*zeta*v1)
+    + int2d(Th)(D*grad(s2)'*grad(v2) + D*grad(s2)'*[z2*v2*dx(psi), z2*v2*dy(psi)])
+    + int2d(Th)(z2*psi*v2) - int2d(Th)(z2*phi*zeta*v2)
+    + int2d(Th)(eps*grad(zeta)'*grad(v3)
+        + z1*D*c1*grad(s1)'*grad(v3)
+        + z2*D*c2*grad(s2)'*grad(v3))
+    + on(Gammain, Gamma2, s1=0, s2=0) + on(Gamma2, Gammain, zeta=0);
+
+// -------------------- Allen-Cahn gradient flow --------------------
+problem AllenCahn(phi, v)
+    = int2d(Th)(phi*v) - int2d(Th)(phiold*v)
+    + int2d(Th)(dt*kappa*grad(phi)'*grad(v))
+    + int2d(Th)(Sta1*dt*phi*v) - int2d(Th)(Sta1*dt*phiold*v)
+    + int2d(Th)(Sta2*dt*grad(phi)'*grad(v)) - int2d(Th)(Sta2*dt*grad(phiold)'*grad(v))
+    + int2d(Th)(dt*beta*(vol-VolTarg)*v + dt*lag*v)
+    - int2d(Th)(1/0.01 * dt*phiold*(1-phiold)*(phiold-0.5)*v)
+    + int2d(Th)(dt*r*v)
+    + on(Gamma2, phi=0);
