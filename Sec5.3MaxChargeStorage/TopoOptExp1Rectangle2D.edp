@@ -1,9 +1,6 @@
-// ssP.N.P Topology Optimization																						//
-// Maximization the concentration of electrolyte species																//
-// This script performs 2D topology optimization of supercapacitor electrodes on a (0,1)times(0,2) rectangular domain,	//
-// maximizing net charge storage under steady-state PNP constraints via a stabilized gradient flow scheme. It tests 	//
-// multiple initial phase-field modes and corresponds to Section 5.3 Example 1 and Figs. 5.4–5.6.						//
-// Modifying line 67 to select different holes for initial phase field function											//
+// ssP.N.P Topology Optimization
+// Maximization the concentration of electrolyte species
+// Freefem ++
 // =========================Essential parameters==============================//
 
 load "iovtk"
@@ -66,47 +63,8 @@ Qh Ea1,Ea2;
 
 phi = (1- ( 0.5*cos(pi*6*x+pi)*cos(pi*6*y)+0.5 ))*(x<=0.75)+0.0*(x>=0.75);//1.0*(x<(1.0+0.25*sin(6*pi*y)))+0.0*(x>=(1.0+0.25*sin(6*pi*y)));//(1- ( 0.5*cos(pi*5*x+pi)*cos(pi*5*y)+0.5 ));//1.0*(x<(1.0+0.3*sin(6*pi*y)))+0.0*(x>=(1.0+0.3*sin(6*pi*y)));
 phiold = phi;
-// =========================Weak formulations=================================//
-problem NernstPlanck1(c1, v)
-        = int2d(Th)(D*[dx(c1) + z1*c1*dx(psi), dy(c1) + z1*c1*dy(psi)]'*grad(v))
-        + on(Gammain, c1=0.5)+ on(Gamma2, c1=0);
+include "PDE_state_adjoint_gradflow_solver_2d.edp"
 
-problem NernstPlanck2(c2, v)
-        = int2d(Th)(D*[dx(c2) + z2*c2*dx(psi), dy(c2) + z2*c2*dy(psi)]'*grad(v))
-        + on(Gammain, c2=0.5)+ on(Gamma2, c2=0);
-
-problem Poisson(psi, v)
-        = int2d(Th)(eps*grad(psi)'*grad(v)) - int2d(Th)(phi*z1*c1*v+phi*z2*c2*v)
-        + on(Gamma2, psi=psi0)+on(Gammain,psi=0.0);
-
-problem NewtonCorPoisson(dpsi, v, init=0)
-        = int2d(Th)(eps*grad(dpsi)'*grad(v)+phi*z1^2*rho1*exp(-z1*psi)*dpsi*v+phi*z2^2*rho2*exp(-z2*psi)*dpsi*v)
-         + int2d(Th)(eps*grad(psi)'*grad(v)-phi*z1*rho1*exp(-z1*psi)*v-phi*z2*rho2*exp(-z2*psi)*v)
-         + on(Gammain,Gamma2, dpsi=0);
-
-problem NernstPlanck1Slot(rho1, v, init=0)//positive ion valence 1
-        = int2d(Th)(D*[Ea1*dx(rho1), Ea1*dy(rho1)]'*grad(v))
-        + on(Gammain, rho1 = c0*exp(z1*psi))+on(Gamma2,rho1=0);
-
-problem NernstPlanck2Slot(rho2, v, init=0)//negative ion valence -1
-        = int2d(Th)(D*[Ea2*dx(rho2), Ea2*dy(rho2)]'*grad(v))
-        + on(Gammain, rho2 = c0*exp(z2*psi))+on(Gamma2,rho2=0);
-
-problem Adjoint([s1,s2,zeta],[v1,v2,v3])
-        = int2d(Th)(D*grad(s1)'*grad(v1) + D*grad(s1)'*[z1*v1*dx(psi), z1*v1*dy(psi)])
-          +int2d(Th)(z1*psi*v1)- int2d(Th)(z1*phi*zeta*v1)
-          +int2d(Th)(D*grad(s2)'*grad(v2) + D*grad(s2)'*[z2*v2*dx(psi), z2*v2*dy(psi)])
-          +int2d(Th)(z2*psi*v2)- int2d(Th)(z2*phi*zeta*v2)
-          +int2d(Th)(eps*grad(zeta)'*grad(v3)+z1*D*c1*grad(s1)'*grad(v3)+z2*D*c2*grad(s2)'*grad(v3))
-          + on(Gammain,Gamma2, s1=0,s2=0) + on(Gamma2,Gammain, zeta=0);
-
-problem AllenCahn(phi,v) = int2d(Th)(phi*v) - int2d(Th)(phiold*v)
-+ int2d(Th)(dt*kappa*grad(phi)'*grad(v))
-+ int2d(Th)(Sta1*dt*phi*v)-int2d(Th)(Sta1*dt*phiold*v) 
-+ int2d(Th)(Sta2*dt*grad(phi)'*grad(v))-int2d(Th)(Sta2*dt*grad(phiold)'*grad(v)) 
-+ int2d(Th)(dt*beta*(vol-VolTarg)*v+dt*lag*v)
-- int2d(Th)(1/(0.01)*dt*phiold*(1-phiold)*(phiold-0.5)*v)
-+ int2d(Th)(dt*r*v)+ on(Gamma2,phi=0);
 vol = int2d(Th)(phiold);
 
 plot(phi,fill=1,hsv=colorhsv,ps="ini.eps");
@@ -192,7 +150,6 @@ real   Wtotal = -J + 0.5*beta*(vol-VolTarg)^2 + int2d(Th)(0.5*kappa*grad(phi)'*g
 
 cout<<"Iter time :"<<i<<" total energy: "<<Wtotal<<" concentration: "<<J<<" volume error: "<<abs(vol-VolTarg)<<endl;
 
-
 ofstream obj("obj.txt",append);
 obj<<J <<endl;
 
@@ -229,35 +186,3 @@ if (eps0<0.01)
   eps0 = 0.01;
 }
 }
-
-Qh u1,u2;
-u1 = -dx(psi);
-u2 = -dy(psi);
-// for velocity
-ofstream ffuv("electric.dat");
-ffuv<<"Variables="<<"X"<<","<<"Y"<<","<<"u"<<","<<"v"<<","<<"M"<<endl;
-ffuv<<"Zone"<<"   "<<"N="<<Th.nv<<","<<"E="<<Th.nt<<","<<"F=FEPOINT,ET=TRIANGLE"<<endl;
-
-
-// out put for domain 1 velocity, pressure temparature
-	 int i,j;
-//
-	for( i=0;i<Th.nv;i++)
-	{
-	//ffnt<<Th(i).x<<"   "<<Th(i).y<<"   "<<T(Th(i).x,Th(i).y)<<endl;
-		ffuv<<Th(i).x<<"   "<<Th(i).y<<"   "<<u1(Th(i).x,Th(i).y)<<"   "<<u2(Th(i).x,Th(i).y)<<"     "<<sqrt(u1^2+u2^2)(Th(i).x,Th(i).y)<<endl;
-	}
-//
-	for(i=0;i<Th.nt;i++)
-	{
-	for( j=0;j<3;j++)
-	{
-	//ffnt<<Th[i][j]+1<<"  ";
-	ffuv<<Th[i][j]+1<<"  ";
-		}
-	if(j==3)
-	{
-	//ffnt<<endl;
-	ffuv<<endl;
-		}
- }
