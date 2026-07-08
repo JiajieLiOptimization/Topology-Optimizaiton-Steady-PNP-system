@@ -1,6 +1,7 @@
-// ssP.N.P Topology Optimization
-// Maximization the concentration of electrolyte species
-// Freefem ++
+// This script validates the ion-exclusion effect of parameter alpha0 in the modified PNP system on a unit square    //
+// with a sinusoidal electrode interface. It tests multiple alpha0 values to verify suppressed ion penetration into  //
+// electrodes, corresponding to Section 5.2 and Figure 5.2 of the manuscript.                                        //
+
 // =========================Essential parameters==============================//
 load "iovtk"
 real eps0 = 0.5;
