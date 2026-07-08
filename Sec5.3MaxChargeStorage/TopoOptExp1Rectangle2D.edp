@@ -1,6 +1,9 @@
-// ssP.N.P Topology Optimization
-// Maximization the concentration of electrolyte species
-// Freefem ++
+// ssP.N.P Topology Optimization																						//
+// Maximization the concentration of electrolyte species																//
+// This script performs 2D topology optimization of supercapacitor electrodes on a (0,1)times(0,2) rectangular domain,	//
+// maximizing net charge storage under steady-state PNP constraints via a stabilized gradient flow scheme. It tests 	//
+// multiple initial phase-field modes and corresponds to Section 5.3 Example 1 and Figs. 5.4–5.6.						//
+// Modifying line 67 to select different holes for initial phase field function											//
 // =========================Essential parameters==============================//
 
 load "iovtk"
