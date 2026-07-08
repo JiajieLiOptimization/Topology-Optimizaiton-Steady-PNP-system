@@ -1,7 +1,9 @@
-// P.N.P shape Optimization 3d space
-// Maximization the concentration of electrolyte species
-// 2 species
-// Freefem ++
+// P.N.P shape Optimization 3d space																		//
+// Maximization the concentration of electrolyte species													//
+// This script conducts 3D topology optimization on a cylindrical annular domain, maximizing supercapacitor //
+// charge storage via the gradient flow method and yielding wavy electrode-electrolyte interfaces. It 		//
+// corresponds to Section 5.3 Example 3 Case 2 and Figs. 5.10, 5.11.										//
+
 load "lapack" // For call matrix inverse
 load "iovtk"
 load "msh3"
