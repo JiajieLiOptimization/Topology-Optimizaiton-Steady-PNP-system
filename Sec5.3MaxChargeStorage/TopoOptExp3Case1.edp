@@ -1,7 +1,10 @@
-// P.N.P shape Optimization 3d space
-// Maximization the concentration of electrolyte species
-// 2 species
-// Freefem ++
+// P.N.P shape Optimization 3d space																					//
+// Maximization the concentration of electrolyte species																//
+// This script performs 3D topology optimization on a cuboid domain under steady-state PNP constraints, maximizing 		//
+// supercapacitor charge storage via gradient flow and yielding porous electrode structures. It corresponds to Section 	//
+// 5.3 Example 3 Case 1 and Figs. 5.9, 5.11.																			//
+// Modifying line 67 to select different holes for initial phase field function											//
+
 load "lapack" // For call matrix inverse
 load "iovtk"
 load "msh3"
