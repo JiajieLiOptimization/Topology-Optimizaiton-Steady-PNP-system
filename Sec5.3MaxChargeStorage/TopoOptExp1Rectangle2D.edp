@@ -228,7 +228,6 @@ if (eps0<0.01)
 {
   eps0 = 0.01;
 }
-cout<<"eps0: "<<eps0<<endl;
 }
 
 Qh u1,u2;
