@@ -63,7 +63,10 @@ problem NewtonCorPoisson(dpsi, v, init=0)
         - phi*z1*rho1*exp(-z1*psi)*v
         - phi*z2*rho2*exp(-z2*psi)*v)
     + on(Gammain, Gamma2, dpsi=0);
-
+problem NewtonCorPoisson1(dpsi, v, init=0)
+        = int2d(Th)(eps*grad(dpsi)'*grad(v)+Ea1*z1^2*rho1*dpsi*v+Ea2*z2^2*rho2*dpsi*v)
+         + int2d(Th)(eps*grad(psi)'*grad(v)-Ea1*z1*rho1*v-Ea2*z2*rho2*v)
+         + on(Gammain,Gamma2, dpsi=0);
 // -------------------- Slotboom formulation of Nernst-Planck --------------------
 problem NernstPlanck1Slot(rho1, v, init=0)
     = int2d(Th)(D*[Ea1*dx(rho1), Ea1*dy(rho1)]'*grad(v))
