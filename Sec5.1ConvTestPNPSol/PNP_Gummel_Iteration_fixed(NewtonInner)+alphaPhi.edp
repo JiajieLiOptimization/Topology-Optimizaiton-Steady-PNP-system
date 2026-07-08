@@ -2,6 +2,11 @@
 //                       PNP_Steady_State_NumericalSolver                     //
 //                                Li Jiajie                                   //
 //                             Gummel fixed point method                      //
+// This script verifies the convergence rates of the steady-state PNP solver  //
+// using Gummel scheme and piecewise linear finite elements. It computes L2   //
+// and H¹ errors for concentrations and potential on a unit square,           //
+// validating optimal discretization accuracy. This test corresponds to       //
+// Section 5.1 and Figure 5.1 of the manuscript.                              //
 // ===========================================================================//
 
 // =======================mesh generation=====================================//
