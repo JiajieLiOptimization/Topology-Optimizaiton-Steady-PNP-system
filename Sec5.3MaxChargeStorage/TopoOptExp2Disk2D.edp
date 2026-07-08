@@ -3,7 +3,7 @@
 // This script conducts topology optimization for cylindrical supercapacitors on an annular domain with the outer ring  //
 // as the electrode. It generates petal-shaped interfacial structures to maximize charge storage via gradient flow,     //
 // corresponding to Section 5.3 Example 2 and Figs. 5.7–5.8.															//
-// Modifying line 67 to select different holes for initial phase field function											//
+// Modifying line 74 to select different holes for initial phase field function											//
 
 // =========================Essential parameters==============================//
 load "iovtk"
@@ -18,7 +18,7 @@ real kappa = 1e-3;
 real Sta1 = 1.0;
 real Sta2 = 0.01;
 real beta = 500;
-
+real alpha = 0.01;
 real lag = 0.0;
 real eta = 60.0;
 int GummelIter = 30;
@@ -70,8 +70,10 @@ Wh phi, phiold, r;
 fespace Qh(Th, P0);
 Qh Ea1,Ea2;
 
+
 phi = (1- ( 0.5*cos(pi*4*x+pi)*cos(pi*4*y)+0.5 ))*(x^2+y^2<0.8)+0.0*(x^2+y^2>=0.8);//1.0*(x<(1.0+0.25*sin(6*pi*y)))+0.0*(x>=(1.0+0.25*sin(6*pi*y)));//(1- ( 0.5*cos(pi*5*x+pi)*cos(pi*5*y)+0.5 ));//1.0*(x<(1.0+0.3*sin(6*pi*y)))+0.0*(x>=(1.0+0.3*sin(6*pi*y)));
 phiold = phi;
+include "PDE_state_adjoint_gradflow_solver_2d.edp"
 vol = int2d(Th)(phiold);
 
 plot(phi,wait=1,value=1,fill=1,hsv=colorhsv,ps="ini.eps");
