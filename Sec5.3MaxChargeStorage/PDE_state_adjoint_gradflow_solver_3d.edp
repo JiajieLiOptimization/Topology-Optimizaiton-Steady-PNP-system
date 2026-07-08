@@ -1,0 +1,80 @@
+// =============================================================
+// 3D PNP State, Adjoint and Gradient Flow Solver Module
+// For supercapacitor electrode topology optimization
+// Includes: Newton-corrected Poisson, Slotboom-form Nernst-Planck,
+//           adjoint system, and Allen-Cahn phase field evolution
+// Corresponds to the numerical schemes in Section 3 of the manuscript
+// =============================================================
+// Dependencies (must be defined before including):
+//   --- Mesh and spaces ---
+//   - Th: 3D computational mesh
+//   - Wh: P1 finite element space
+//   - Qh: P0 finite element space
+//   - grad: 3D gradient macro (dx, dy, dz components)
+//   --- State equation variables ---
+//   - psi: electric potential (Wh)
+//   - dpsi: Newton correction for potential (Wh)
+//   - rho1, rho2: Slotboom transformed ion densities (Wh)
+//   - c1, c2: ion concentrations (Wh)
+//   - Ea1, Ea2: inverse exponential potential terms (Qh)
+//   - v1: scalar test function (Wh)
+//   --- Adjoint equation variables ---
+//   - s1, s2, zeta: adjoint state variables (Wh)
+//   - v2, v3: adjoint test functions (Wh)
+//   --- Phase field variables ---
+//   - phi, phiold: level set functions (Wh)
+//   - r: descent direction term (Wh)
+//   --- Coefficients and parameters ---
+//   - eps: permittivity coefficient field (Wh)
+//   - D: diffusion coefficient field (Wh)
+//   - z1, z2: ion valence numbers
+//   - c01, c02: inlet concentration boundary values
+//   - dt, kappa, Sta1, Sta2, beta, VolTarg, lag: phase field parameters
+//   - vol: current volume fraction
+//   --- Boundary labels ---
+//   - Gammain: inlet boundary label
+//   - Gamma2: electrode boundary label
+// =============================================================
+
+// -------------------- Newton correction for Poisson equation --------------------
+problem NewtonCorPoisson(dpsi, v1, solver=sparsesolver)
+    = int3d(Th)(eps*grad(dpsi)'*grad(v1)
+        + phi*z1^2*rho1*exp(-z1*psi)*dpsi*v1
+        + phi*z2^2*rho2*exp(-z2*psi)*dpsi*v1)
+    + int3d(Th)(eps*grad(psi)'*grad(v1)
+        - phi*z1*rho1*exp(-z1*psi)*v1
+        - phi*z2*rho2*exp(-z2*psi)*v1)
+    + on(Gammain, Gamma2, dpsi=0);
+
+// -------------------- Slotboom formulation of Nernst-Planck equations --------------------
+problem NernstPlanck1(rho1, v1, solver=sparsesolver)
+    = int3d(Th)(D*[Ea1*dx(rho1), Ea1*dy(rho1), Ea1*dz(rho1)]'*grad(v1))
+    + on(Gammain, rho1 = c01*exp(z1*psi)) + on(Gamma2, rho1=0);
+
+problem NernstPlanck2(rho2, v1, solver=sparsesolver)
+    = int3d(Th)(D*[Ea2*dx(rho2), Ea2*dy(rho2), Ea2*dz(rho2)]'*grad(v1))
+    + on(Gammain, rho2 = c02*exp(z2*psi)) + on(Gamma2, rho2=0);
+
+// -------------------- Adjoint system --------------------
+problem adjoint([s1,s2,zeta],[v1,v2,v3], solver=sparsesolver)
+    = int3d(Th)(D*grad(s1)'*grad(v1)
+        + D*grad(s1)'*[z1*v1*dx(psi), z1*v1*dy(psi), z1*v1*dz(psi)])
+    + int3d(Th)(z1*psi*v1) - int3d(Th)(z1*phi*zeta*v1)
+    + int3d(Th)(D*grad(s2)'*grad(v2)
+        + D*grad(s2)'*[z2*v2*dx(psi), z2*v2*dy(psi), z2*v2*dz(psi)])
+    + int3d(Th)(z2*psi*v2) - int3d(Th)(z2*phi*zeta*v2)
+    + int3d(Th)(eps*grad(zeta)'*grad(v3)
+        + z1*D*c1*grad(s1)'*grad(v3)
+        + z2*D*c2*grad(s2)'*grad(v3))
+    + on(Gammain, Gamma2, s1=0, s2=0) + on(Gamma2, Gammain, zeta=0);
+
+// -------------------- Allen-Cahn gradient flow --------------------
+problem AllenCahn(phi, v1, solver=sparsesolver)
+    = int3d(Th)(phi*v1) - int3d(Th)(phiold*v1)
+    + int3d(Th)(dt*kappa*grad(phi)'*grad(v1))
+    + int3d(Th)(Sta1*dt*phi*v1) - int3d(Th)(Sta1*dt*phiold*v1)
+    + int3d(Th)(Sta2*dt*grad(phi)'*grad(v1)) - int3d(Th)(Sta2*dt*grad(phiold)'*grad(v1))
+    + int3d(Th)(dt*beta*(vol-VolTarg)*v1 + dt*lag*v1)
+    - int3d(Th)(1/0.01 * dt*phiold*(1-phiold)*(phiold-0.5)*v1)
+    + int3d(Th)(dt*r*v1)
+    + on(Gamma2, phi=0) + on(Gammain, phi=1);
