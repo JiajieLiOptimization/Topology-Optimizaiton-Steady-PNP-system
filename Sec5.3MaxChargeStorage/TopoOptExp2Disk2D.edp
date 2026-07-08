@@ -168,10 +168,14 @@ for(int i=1; i<=Niter; i++)
     cL2Norm = sqrt(cL2Norm);
     psiL2Norm = int2d(Th)((psi-psip)^2);
     psiL2Norm = sqrt(psiL2Norm);
-    cout<<" L2 norm of concentration c:"<<cL2Norm<<endl;
-    cout<<" L2 norm of potential phi:"<<psiL2Norm<<endl;
     if (psiL2Norm + cL2Norm < 1e-8)
-      break;
+    {
+    cout<<" Total number of Gummel scheme using Newton inner iteration :"<<i<<endl;
+    cout<<" After Gummel scheme, L2-err norm of concentration c:"<<cL2Norm<<endl;
+    cout<<" After Gummel scheme, L2-err norm of potential phi:"<<psiL2Norm<<endl;
+    
+    break;
+    }
     psip = psi; cp1 = c1; cp2 = c2;
   };
 
@@ -194,7 +198,7 @@ for(int i=1; i<=Niter; i++)
      phiold = phi;
      phiold = max(0,phiold);
      phiold = min(phiold,1);
-		 vol = int2d(Th)(phiold);
+	 vol = int2d(Th)(phiold);
   }
      phi = max(0,phi);
      phi = min(phi,1);
@@ -202,9 +206,9 @@ for(int i=1; i<=Niter; i++)
   
 
 real J = int2d(Th)(phi*z1*c1+phi*z2*c2);
-cout<<"concentration: "<<J<<endl;
-real   Wtotal = int2d(Th)(0.25*(phi-1)^2*phi^2);
-cout<<"total energy: "<<Wtotal<<endl;
+real Wtotal = int2d(Th)(0.25*(phi-1)^2*phi^2);
+
+cout<<"Iter time :"<<i<<" total energy: "<<Wtotal<<" concentration: "<<J<<" volume error: "<<abs(vol-VolTarg)<<endl;
 
 ofstream obj("obj.txt",append);
 obj<<J <<endl;
@@ -238,7 +242,6 @@ if(alpha>1)
 {
   alpha = 1;
 }
-cout<<"alpha= "<<alpha<<endl;
 }
 Qh u1,u2;
 u1 = -dx(psi);
