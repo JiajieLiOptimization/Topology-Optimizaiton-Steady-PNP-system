@@ -1,6 +1,10 @@
-// ssP.N.P Topology Optimization
-// Maximization the concentration of electrolyte species
-// Freefem ++
+// ssP.N.P Topology Optimization																						//
+// Maximization the concentration of electrolyte species																//
+// This script conducts topology optimization for cylindrical supercapacitors on an annular domain with the outer ring  //
+// as the electrode. It generates petal-shaped interfacial structures to maximize charge storage via gradient flow,     //
+// corresponding to Section 5.3 Example 2 and Figs. 5.7–5.8.															//
+// Modifying line 67 to select different holes for initial phase field function											//
+
 // =========================Essential parameters==============================//
 load "iovtk"
 real eps0 = 0.01;
